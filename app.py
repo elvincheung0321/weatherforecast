@@ -7,13 +7,11 @@ from datetime import datetime
 app = Flask(__name__)
 
 def get_weather_data():
-    # hong kong observatory api
     url = "https://data.weather.gov.hk/weatherAPI/opendata/weather.php?dataType=fnd&lang=en"
     
     response = requests.get(url)
     weather_data = json.loads(response.content)
     
-    # lists for storing data
     date_list = []
     week_list = []
     max_temp_list = []
@@ -21,7 +19,6 @@ def get_weather_data():
     max_rh_list = []
     min_rh_list = []
     
-    # get the weather data
     for i in range(0, 9):
         forecast = weather_data["weatherForecast"][i]
         date_list.append(forecast["forecastDate"])
@@ -47,15 +44,15 @@ def index():
     df = get_weather_data()
     dates = df['Date'].tolist()
     
-    dates_list = []
-    for date_string in dates:
-        date_object = datetime.strptime(date_string, "%Y%m%d")
-        dates_list.append({
-            'original': date_string,
-            'formatted': date_object.strftime("%Y/%m/%d (%a)")
+    formatted_dates = []
+    for date_str in dates:
+        date_obj = datetime.strptime(date_str, "%Y%m%d")
+        formatted_dates.append({
+            'original': date_str,
+            'formatted': date_obj.strftime("%Y/%m/%d (%a)")
         })
     
-    return render_template('index.html', dates=dates_list)
+    return render_template('index.html', dates=formatted_dates)
 
 @app.route('/get_weather', methods=['POST'])
 def get_weather():
@@ -65,8 +62,8 @@ def get_weather():
     result = df[df['Date'] == selected_date]
 
     html_table = result.to_html(classes='table table-striped', index=False, escape=False)
-    date_object = datetime.strptime(selected_date, "%Y%m%d")
-    display_date = date_object.strftime("%Y/%m/%d (%A)")
+    date_obj = datetime.strptime(selected_date, "%Y%m%d")
+    display_date = date_obj.strftime("%Y/%m/%d (%A)")
     
     return jsonify({
         'success': True, 
